@@ -1,0 +1,125 @@
+from math import log
+
+
+class Decision_Tree:
+
+    def __init__(self, files):
+        """attr为包含的属性 ，DataSet为数据集"""
+        # 为attr各个属性值中所对应的取值
+        # key为 attr value为取值 lists
+        self.labels_value = {}
+        self.require_data(files)
+        self.data_number = len(self.DataSet)
+        self.Over_entropy = self.caculate_ent(self.DataSet)
+
+    def flatten(self, data_set, index, value):
+        """定义一个分离函数，将data_set的各个列表的index等于value的列表分离出去"""
+        flatten_data = []
+        for data1 in data_set:
+            if data1[index] == value:
+                res_set = data1[:index]
+                res_set.extend(data1[index+1:])
+                flatten_data.append(res_set)
+        return flatten_data
+
+    def build_tree(self):
+        copy_attr = self.attr
+        self.tree_map = self.create_tree(self.DataSet, copy_attr)
+        return self.tree_map
+
+    def create_tree(self, data_set, attr):
+        """建造决策树并求出attr中entropy最大的index"""
+        if len(data_set[0]) == 1:
+            return data_set[0][0]
+        res_lists = [example[-1] for example in data_set]
+        if res_lists.count(res_lists[0]) == len(res_lists):
+            return res_lists[0]
+        best_entropy_index = self.get_best_attr(attr, data_set)
+        the_attr = attr[best_entropy_index]
+        my_tree_map = dict()
+        current_key = the_attr
+        current_value = dict()
+        copy_attr = attr[:best_entropy_index]
+        copy_attr.extend(attr[best_entropy_index + 1:])
+        for attr_val in self.type(data_set, best_entropy_index):
+            current_value[attr_val] = self.create_tree\
+                (self.flatten(data_set, best_entropy_index, attr_val), copy_attr)
+        my_tree_map[current_key] = current_value
+        return my_tree_map
+
+    def get_best_attr(self, attr, data_set):
+        """返回attr中信息熵最大的属性的位置"""
+        if len(attr) == 0:
+            return
+        max_entropy = 0
+        best_index = current_index = 0
+        times = len(attr) - 1
+        while current_index < times:
+            attr_entropy = 0
+            for val in self.labels_value[attr[current_index]]:
+                flatten_data = self.flatten(data_set, current_index, val)
+                res_entropy = self.caculate_ent(flatten_data)
+                attr_entropy += float(len(flatten_data))/len(data_set) * res_entropy
+                attr_entropy = self.Over_entropy - attr_entropy
+            if max_entropy < attr_entropy:
+                max_entropy = attr_entropy
+                best_index = current_index
+            current_index += 1
+        return best_index
+
+    def caculate_ent(self, DataSet):
+        """计算传入的DateSet的最后一个元素的熵"""
+        count = len(DataSet)
+        decision = {}
+        for TheData in DataSet:
+            label = TheData[-1]
+            if label not in decision.keys():
+                decision[label] = 0
+            decision[label] += 1
+        entropy = 0
+        for key in decision:
+            prob = float(decision[key])/count
+            entropy -= prob * log(prob, 2)
+        return entropy
+
+    def require_data(self, files):
+        """从data.txt文本中读取数据"""
+        filename = files
+        read_row = 1
+        attr = []
+        data_set = []
+        with open(filename) as FileObj:
+            for line in FileObj:
+                if read_row == 1:
+                    attr = line.split()
+                    for the_attr in attr[:-1]:
+                        self.labels_value[the_attr] = []
+                else:
+                    recognize_line = line.split()
+                    index = 0
+                    times = len(recognize_line) - 1
+                    while index < times:
+                        if recognize_line[index] not in self.labels_value[attr[index]]:
+                            self.labels_value[attr[index]].append(recognize_line[index])
+                        index += 1
+                    data_set.append(recognize_line)
+                read_row += 1
+        self.attr = attr
+        self.DataSet = data_set
+
+    @staticmethod
+    def type(data_set, pos):
+        """以list形式返回在data_set中所在位置"""
+        type = list()
+        for the_data in data_set:
+            if the_data[pos] not in type:
+                type.append(the_data[pos])
+        return type
+
+# 从data.tex中读取列表并初始化树
+files = 'data.txt'
+my_tree = Decision_Tree(files)
+print(my_tree.build_tree())
+
+
+
