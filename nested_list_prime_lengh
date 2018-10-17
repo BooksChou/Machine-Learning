@@ -1,0 +1,38 @@
+m = [[[1], [2]], [5], [3], [[8], 3]]
+# Defines an expansion function that expands the elements of a nested list
+# into a simple list (solution to nested list method 1)
+def flatten(input_list):
+    output_list = []
+    while True:
+        if not input_list:
+            break
+        for index, i in enumerate(input_list):
+            if type(i) == list:
+                input_list = i + input_list[index + 1:]
+                break
+            else:
+                output_list.append(i)
+                input_list.pop(index)
+                break
+    return output_list
+
+n = flatten(m)
+# Define a prime function
+def number_of_primes(n_list):
+    for j in n_list:
+        if j <= 1:
+            n.remove(j)
+        if j == 2:
+            break
+        if j % 2 == 0:
+            n.remove(j)
+    for j in n_list:
+        for i in range(2, j-1):
+            if j % i == 0:
+                n.remove(j)
+            i += 1
+            break
+    return n
+
+
+print(len(number_of_primes(n)))
