@@ -1,0 +1,22 @@
+a = [1, 2, [3, 4], -4]
+
+
+# Define a parity judgment function
+def is_even(a_list):
+    b = []
+    for i in a_list:
+
+        # To determine whether I in the list is still a list,
+        # if it is taken out separately before making a judgment,
+        # otherwise, the parity of I element can be directly judged (solution to nested list method 2).
+        if isinstance(i, list):
+            list_c = is_even(i)
+            for d in list_c:
+                b.append(d)
+        else:
+            if i % 2 == 0:
+                b.append(i)
+    return b
+
+
+print(is_even(a))
