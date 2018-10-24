@@ -1,0 +1,78 @@
+import os
+state = ['S1', 'S2', 'S3']
+rew = {'S1': -1, 'S2': 2, 'S3': 6}
+tra = {'S1': {'A': {'S1': 0.1, 'S2': 0.9, 'S3': 0},
+              'B': {'S1': 0.2, 'S2': 0.6, 'S3': 0.2},
+              'C': {'S1': 0.7, 'S2': 0, 'S3': 0.3}},
+       'S2': {'A': {'S1': 0, 'S2': 1, 'S3': 0},
+              'B': {'S1': 1, 'S2': 0, 'S3': 0},
+              'C': {'S1': 0, 'S2': 0.6, 'S3': 0.4}},
+       'S3': {'A': {'S1': 0.7, 'S2': 0, 'S3': 0.3},
+              'B': {'S1': 0.9, 'S2': 0, 'S3': 0.1},
+              'C': {'S1': 0, 'S2': 1, 'S3': 0}}, }
+actions = ['A', 'B', 'C']
+discount = 0.9
+
+
+class MarkovAction:
+
+    """定义一个带有action参数的类"""
+    def __init__(self, state, rew, tra, discount, actions):
+        self.state = state
+        self.rew = rew
+        self.tra = tra
+        self.discount = discount
+        self.actions = actions
+
+    def j_items(self, times):
+        current_k = 1
+        res = list()
+        init_map = {}
+        for key in self.state:
+            init_map[key] = 0
+        res.append(init_map)
+        while current_k < times+1:
+            temp_list = {}
+            for state in self.state:
+                j_with_max_action = -1000000000
+                for action in self.actions:
+                    j_with_action = 0
+                    for the_neighbor in self.tra[state][action]:
+                        j_with_action += res[current_k - 1][the_neighbor] * self.tra[state][action][the_neighbor]
+                    j_with_action = self.rew[state] + j_with_action * self.discount
+                    if j_with_action > j_with_max_action:
+                        j_with_max_action = j_with_action
+                temp_list[state] = j_with_max_action
+            res.append(temp_list)
+            current_k += 1
+        return res
+
+    def get_data(self, data, res, turns):
+        times = 1
+        if not os.path.exists(data):
+            os.system(r"touch {}".format(data))
+        with open(data, 'w') as file_obj:
+            for item in res[1:]:
+                lines = ""
+                for val in item.values():
+                    lines += str(round(val, turns)) + " "
+                lines = "k = " + str(times) + " :" + lines + '\n'
+                if times == 1:
+                    title = ""
+                    for state in self.state:
+                        title += state + "   "
+                    title += '\n'
+                    file_obj.writelines(title)
+                file_obj.writelines(lines)
+                times += 1
+
+
+Markov = MarkovAction(state, rew, tra, discount, actions)
+res = Markov.j_items(30)
+data = "data_action.txt"
+Markov.get_data(data, res, 4)
+
+
+
+
+
