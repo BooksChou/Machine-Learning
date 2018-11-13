@@ -1,4 +1,5 @@
-from sklearn import datasets
+from sklearn import svm, datasets
+# 一个拟合的svm分类器
 
 
 class DataSet:
@@ -41,4 +42,12 @@ class DataSet:
 
 if __name__ == "__main__":
     data = DataSet('digits')
+    # 输入一个rate = 0.7 进行测试
     x_train, y_train, x_test, y_test = data.get_train_test_set(0.7)
+    # clf即classifier  SVC为svm中的一个classification
+    clf = svm.SVC()
+    clf.fit(x_train, y_train)
+    test_point = x_test[12]
+    y_true = y_test[12]
+    # 调用predict方法判断数据集
+    clf.predict(test_point)
