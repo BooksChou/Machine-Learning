@@ -1,0 +1,44 @@
+from sklearn import datasets
+
+
+class DataSet:
+
+    def __init__(self, name):
+        self.name = name
+
+    def download_data(self):
+        if self.name == 'iris':
+            self.downloaded_data = datasets.load_iris()
+        elif self.name == 'digits':
+            self.downloaded_data = datasets.load_digits()
+        else:
+            # 两种数据集都不是就报错
+            print('DataSet Error:No named datasets')
+
+    def get_xy(self):
+        self.download_data()
+        # 训练集和测试集
+        x = self.downloaded_data.data
+        y = self.downloaded_data.target
+        print('\nOriginal data looks like this :\n', x)
+        print('\nLables looks like this :\n', y)
+        return x, y
+
+    def get_train_test_set(self, rate):
+        # 得到数据集
+        x, y = self.get_xy()
+        # 总数据
+        n_samples = len(x)
+        # 测试数据
+        n_train = n_samples*rate
+        # 分割数据
+        x_train = x[:n_train]
+        y_train = y[:n_train]
+        x_test = x[n_train:]
+        y_test = y[n_train:]
+        return x_train, y_train, x_test, y_test
+
+
+if __name__ == "__main__":
+    data = DataSet('digits')
+    x_train, y_train, x_test, y_test = data.get_train_test_set(0.7)
