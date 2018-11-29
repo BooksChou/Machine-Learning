@@ -1,0 +1,121 @@
+import os
+
+
+class TDL:
+    def __init__(self, row, clo, reword):
+        """初始化"""
+        self.files = "Result.txt"
+        self.rows = row
+        self.cols = clo
+        self.reword = reword
+        self.map = dict()
+        self.status = []
+        self.Ns = dict()
+        # 初始化图
+        for i in range(1, self.rows+1):
+            for j in range(1, self.cols+1):
+                self.map[(i, j)] = 0.000000
+                self.Ns[(i, j)] = 0
+
+    def calculate_path(self, pi):
+        """根据pi计算新的map"""
+        pre_status = []
+        pre_reword = 0
+        for current_status in pi:
+            if not current_status:
+                self.map[current_status] = self.reward[current_status]
+                self.status.append(current_status)
+            if not pre_status:
+                # 第一次进来的status和reword
+                pre_status = current_status
+                pre_reword = self.reword[current_status]
+                self.print_map(current_status)
+                continue
+            else:
+                self.Ns[(pre_status[0], pre_status[1])] += 1
+                self.map[(pre_status[0], pre_status[1])] = self.map[(pre_status[0], pre_status[1])] + self.alpha(self.Ns[(pre_status[0], pre_status[1])]) * (pre_reword + self.map[current_status] - self.map[(pre_status[0], pre_status[1])])
+            self.print_map(current_status)
+            pre_status = current_status
+            pre_reword = self.reword[current_status]
+
+    def get_data(self, str):
+        if not os.path.exists(self.files):
+            os.system(r"touch {}".format(self.files))
+        with open(self.files, 'a+') as file_obj:
+            file_obj.writelines(str+"\n")
+
+    @staticmethod
+    def alpha(times):
+        return float(60)/(59+times)
+
+    @staticmethod
+    def format_map(number):
+        """将传入的值进行格式化"""
+        res = ""
+        if number >= 0:
+            res += "+"
+        if not number:
+            res += "0.000000"
+        else:
+            res += str(number)
+            index = res.index('.')
+            if len(res) - index < 6:
+                first_num = 6 - index
+                value = ""
+                while first_num > 0:
+                    value += "0"
+                    first_num -= 1
+                res += value
+            else:
+                res = str(round(float(res), 6))
+        res += "   "
+        return res
+
+    def print_map(self, pos):
+        """打印二维数组"""
+        print("Utilities after taking step " + "(" + str(pos[0]) + "," + str(pos[1]) + ")")
+        self.get_data("Utilities after taking step " + "(" + str(pos[0]) + "," + str(pos[1]) + ")")
+        col = self.cols
+        row = self.rows
+        index = 1
+        while col > 0:
+            res = ""
+            while index <= row:
+                res += self.format_map(self.map[(index, col)])
+                index += 1
+            self.get_data(res)
+            print(res)
+            index = 1
+            col -= 1
+        print()
+
+
+the_map = {(1, 2): 1}
+
+reword = {
+    (1, 1): -0.04,
+    (1, 2): -0.04,
+    (1, 3): -0.04,
+    (2, 1): -0.04,
+    (2, 2): -0.04,
+    (2, 3): -0.04,
+    (3, 1): -0.04,
+    (3, 2): -0.04,
+    (3, 3): -0.04,
+    (4, 1): -0.04,
+    (4, 2): -1.00,
+    (4, 3): 1.00
+}
+tdl_path = TDL(4, 3, reword)
+pi1 = [(1, 1), (1, 2), (1, 3), (1, 2), (1, 3), (2, 3), (3, 3), (4, 3)]
+tdl_path.calculate_path(pi1)
+
+
+pi2 = [(1, 1), (1, 2), (1, 3), (2, 3), (3, 3), (2, 3), (3, 3), (4, 3)]
+tdl_path.calculate_path(pi2)
+
+
+pi3 = [(1, 1), (2, 1), (3, 1), (3, 2), (4, 2)]
+tdl_path.calculate_path(pi3)
+
+
