@@ -1,0 +1,142 @@
+# Zhang shuai  2018124071
+import random
+
+
+Learning_steps = 500     # 设置学习次数
+Final_state = (5, 4)     # 设置最终状态
+Initial_state = (7, 3)   # 设置初始状态
+Greedy_rate = 0.9        # 设置贪婪值
+Learning_rate = 0.01     # 设置学习率
+Decay = 0.95             # 设置衰减率
+Moving_action = ["up", "down", "left", "right"]   # 设置移动状态
+Reword = 10
+Alive_points = [(2, 6), (2, 5), (2, 4),
+          (2, 3), (2, 2), (3, 6),
+          (3, 3), (3, 2), (4, 6), (4, 5), (4, 4),
+          (4, 2), (5, 6), (5, 4), (5, 2), (6, 6), (6, 3),
+          (6, 2), (7, 6), (7, 5), (7, 4), (7, 3), (7, 1),
+          (8, 2), (8, 1)]      # 能够通过的点的坐标
+
+
+def init(the_states, the_actions):
+    the_path = dict()
+    for state in the_states:
+        the_path[state] = dict()
+        for action in the_actions:
+            the_path[state][action] = 0.00
+    return the_path
+
+
+def moving(the_path, current_point, greedy_rate=Greedy_rate):
+    # 选择 current_point下的应该选择的Moving_action
+    if random.randint(0, 100) > greedy_rate * 100 or is_continue(the_path[current_point]):
+        action_length = len(Moving_action)
+        return Moving_action[random.randint(0, action_length-1)]
+    else:
+        current_action, val = optimize_rew(the_path[current_point])
+        return current_action
+
+
+def is_continue(state_action):
+    for val in state_action.values():
+        if val:
+            return False
+    return True
+
+
+def every_try_step(current_point, action):
+    # 获得经过每次尝试机器人走过的可行的点
+    # 返回每一步的点的坐标
+    x = current_point[0]
+    y = current_point[1]
+    if action == "up":
+        y += 1
+    elif action == "down":
+        y -= 1
+    elif action == "left":
+        x -= 1
+    else:
+        x += 1
+    next_step = (x, y)
+    if next_step not in Alive_points:
+        return 0, current_point
+    else:
+        if is_terminal(next_step):
+            return Reword, next_step
+        else:
+            return 0, next_step
+
+
+def is_terminal(the_state):
+    """判断此时是不是终点"""
+    if the_state == Final_state:
+        return True
+    else:
+        return False
+
+
+def optimize_rew(state_action):
+    # 获得dict()最优的键值对的解
+    dict_key = 0
+    dict_val = 0
+    for key, val in state_action.items():
+        if not dict_key:
+            dict_key = key
+            dictx_val = val
+            continue
+        if val > dict_val:
+            dict_key = key
+            dict_val = val
+    return dict_key, dict_val
+
+
+def the_shortest_path(the_path):
+    s = Initial_state
+    print(s)
+    while not is_terminal(s):
+        action = moving(the_path, s, 1)
+        R, next_s = every_try_step(s, action)
+        s = next_s
+        print(s)
+
+
+def main():
+    the_path = init(Alive_points, Moving_action)
+    for step in range(Learning_steps):
+        s = Initial_state
+        index = 0
+        while not is_terminal(s):
+            action = moving(the_path, s)
+            R, next_s = every_try_step(s, action)
+            current_action, val = optimize_rew(the_path[next_s])
+            gap = R + Decay * val - the_path[s][current_action]
+            the_path[s][action] += Learning_rate * gap
+            s = next_s
+            index += 1
+        print("Try times : "+str(step)+" total cost steps: " + str(index))
+        # 打印尝试的次数以及经过训练到达终点的次数
+    return the_path
+
+
+if __name__ == "__main__":
+    print("the shortest path is: ")
+    the_shortest_path(main())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
