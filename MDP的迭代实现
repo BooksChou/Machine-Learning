@@ -1,0 +1,236 @@
+# Zhang shuai 2018124071
+
+
+def markov_dp():
+    Epsilon = 0.0001  # 设置损失系数
+    Decay = 0.9       # 设置衰减率
+    J = list()
+    J.append(Reword)     # 添加初始状态
+    diff = 1             # diff为初始化n和n+1之间的差值J
+    while diff > Epsilon:
+        temp_map = dict()
+        last_J = J[-1:][0]
+        for state in State_type:
+            max_j = -10000
+            for action in Action:
+                tmp_j = 0
+                for sta, pro in Probability[state][action].items():
+                    tmp_j += last_J[sta] * pro
+                if tmp_j > max_j:
+                    max_j = tmp_j
+            update_num = max_j * Decay + Reword[state]
+            if abs(update_num - last_J[state]) > diff:
+                diff = abs(update_num - last_J[state])
+            temp_map[state] = update_num
+            diff = difference(temp_map, last_J)
+        J.append(temp_map)
+    return J
+
+
+def difference(step, final):
+    diff_value = list()
+    for state, reword in step.items():
+        diff_value.append(abs(final[state] - reword))
+        # 获取n和n+1之间的最大的差值J
+    return max(diff_value)
+
+
+State_type = ['S1', 'S2', 'S3', 'S4', 'S5']
+Reword = {
+    "S1":  1.0,
+    "S2": -1.0,
+    "S3":  0.0,
+    "S4":  3.0,
+    "S5":  1.0
+}
+Action = ["A", "B", "C", "D"]
+Probability = {
+    "S1": {
+        "A": {
+            "S1": 0.2,
+            "S2": 0.8,
+            "S3": 0,
+            "S4": 0,
+            "S5": 0
+        },
+        "B": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 1,
+            "S4": 0,
+            "S5": 0,
+        },
+        "C": {
+            "S1": 1,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0,
+            "S5": 0,
+        },
+        "D": {
+            "S1": 0.8,
+            "S2": 0,
+            "S3": 0.2,
+            "S4": 0,
+            "S5": 0,
+        }
+    },
+    "S2": {
+        "A": {
+            "S1": 0.7,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0.3,
+            "S5": 0
+        },
+        "B": {
+            "S1": 0,
+            "S2": 0.1,
+            "S3": 0,
+            "S4": 0.9,
+            "S5": 0,
+        },
+        "C": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0.8,
+            "S4": 0.2,
+            "S5": 0,
+        },
+        "D": {
+            "S1": 0.8,
+            "S2": 0.2,
+            "S3": 0,
+            "S4": 0,
+            "S5": 0,
+        }
+    },
+    "S3": {
+        "A": {
+            "S1": 0,
+            "S2": 0.5,
+            "S3": 0.5,
+            "S4": 0,
+            "S5": 0
+        },
+        "B": {
+            "S1": 0,
+            "S2": 0.5,
+            "S3": 0.5,
+            "S4": 0,
+            "S5": 0,
+        },
+        "C": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 1,
+            "S4": 0,
+            "S5": 0,
+        },
+        "D": {
+            "S1": 0.5,
+            "S2": 0,
+            "S3": 0.5,
+            "S4": 0,
+            "S5": 0,
+        }
+    },
+    "S4": {
+        "A": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 1,
+            "S5": 0
+        },
+        "B": {
+            "S1": 0,
+            "S2": 0.3,
+            "S3": 0,
+            "S4": 0.7,
+            "S5": 0,
+        },
+        "C": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0,
+            "S5": 1,
+        },
+        "D": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0.5,
+            "S5": 0.5,
+        }
+    },
+    "S5": {
+        "A": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0.3,
+            "S4": 0,
+            "S5": 0.7
+        },
+        "B": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0.6,
+            "S5": 0.4,
+        },
+        "C": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0.9,
+            "S5": 0.1,
+        },
+        "D": {
+            "S1": 0.8,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0,
+            "S5": 0.2,
+        }
+    }
+}
+
+if __name__ == "__main__":
+    ans_J = markov_dp()
+    for index in ans_J:
+        print(index)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
