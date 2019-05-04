@@ -1,0 +1,55 @@
+from csv import reader
+import numpy as np
+import random
+import pandas as pd
+
+open_file = open('test.csv', encoding='utf-8')
+test_file = reader(open_file)
+list_file = list(test_file)
+file_header = list_file[0]
+list_file = list_file[1:]
+arr = np.array(list_file)
+arr = arr.T
+arr = arr.tolist()
+
+new_list = []
+
+
+def clean_data(row):
+    initial_list = []
+    empty_list = {}
+    for string in row:
+        if string == 'NA':
+            string_value = -1
+            initial_list.append(string_value)
+            empty_list[string] = string_value
+        elif string.isdigit() == True:
+            string_value = int(string)
+            initial_list.append(string_value)
+            empty_list[string] = string_value
+        else:
+            if string in empty_list.keys():
+                initial_list.append(empty_list[string])
+            else:
+                string_value = random.randint(0,99)
+                while string_value in initial_list:
+                    string_value = random.randint(0, 99)
+                initial_list.append(string_value)
+                empty_list[string] = string_value
+
+    return initial_list
+
+
+for row in arr:
+    initial_list = clean_data(row)
+    new_list.append(initial_list)
+
+new_list = np.array(new_list)
+new_list = new_list.T
+new_list = new_list.tolist()
+
+new_list.insert(0, file_header)
+
+new_list = np.array(new_list)
+new_list = pd.DataFrame(new_list)
+new_list.to_csv("./output.csv", index=False, header=False)
